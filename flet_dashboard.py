@@ -1,211 +1,213 @@
 import flet as ft
 from utils import control_gadget, set_motor_pwm
 
-# Flet dashboard design
 def main(page: ft.Page):
     page.title = "Octynomo Dashboard"
     page.scroll = ft.ScrollMode.ALWAYS
     page.window_width = 1200
     page.window_height = 800
-    
-    page.scroll = ft.ScrollMode.ALWAYS #Page configurations, title, height, width and scroll mode.
+    page.padding = 10
 
-    background_design = ft.Stack( #Stack for background design
-        [
-            ft.Container( #Container with linear gradient background
-                gradient=ft.LinearGradient(
-                    begin=ft.alignment.top_left,
-                    end=ft.alignment.bottom_right,
-                    colors=["#0288d1", "#81d4fa", "#b3e5fc"] #Gradient color for blurred effect
-                ),
-                expand=True,
-            ),
-            
-        ],
+    # Fondo difuminado pastel
+    background_design = ft.Container(
+        gradient=ft.LinearGradient(
+            begin=ft.alignment.top_left,
+            end=ft.alignment.bottom_right,
+            colors=["#dfe6e9", "#ffffff", "#74b9ff"]
+        ),
         expand=True,
     )
 
     gadget_states = {"ilumination": False, "sound": False, "routine": False, "motor": False}
     data_mapping = {"Ilumination": "ilumination", "Sound": "sound", "Routine": "routine", "Motor": "motor"}
 
-    
     # Login
     txt_user = ft.TextField(
-        hint_text="User", border_radius=12, bgcolor="white",
-        height=55, content_padding=15, text_align=ft.TextAlign.LEFT #Text input for username
+        hint_text="User", border_radius=12, bgcolor="#ffffff",
+        height=55, content_padding=15, text_align=ft.TextAlign.LEFT, expand=True
     )
     txt_password = ft.TextField(
-        hint_text="Password", password=True, can_reveal_password=True, 
-        border_radius=12, bgcolor="white", height=55, content_padding=15, text_align=ft.TextAlign.LEFT #Text input for password
+        hint_text="Password", password=True, can_reveal_password=True,
+        border_radius=12, bgcolor="#ffffff", height=55, content_padding=15, text_align=ft.TextAlign.LEFT, expand=True
     )
-    txt_error = ft.Text("⚠️ Incorrect user or password", color="red500", visible=False) #Error message for incorrect login
+    txt_error = ft.Text("⚠️ Incorrect user or password", color="red", visible=False)
 
-    def login_click(e): #Function to handle login logic
-        if txt_user.value == "adm" and txt_password.value == "1": #defined credentials
-            page.go("/panel") #If correct, navigate to panel view
+    def login_click(e):
+        if txt_user.value == "adm" and txt_password.value == "1":
+            txt_error.visible = False
+            page.go("/panel")
         else:
-            txt_error.visible = True #If incorrect, show error message
+            txt_error.visible = True
             page.update()
 
-    login_form = ft.Container( #Container for login form
+    login_form = ft.Container(
         content=ft.Column(
             controls=[
-                ft.Container(expand=True),
-                ft.Text(
-                    "Login",
-                    size=32,
-                    weight=ft.FontWeight.BOLD,
-                    color="blueGrey900",
-                    text_align=ft.TextAlign.CENTER, #Login container design
-                ),
-                ft.Divider(height=15, color="transparent"),
-
+                ft.Text("Login", size=32, weight=ft.FontWeight.BOLD, color="#2d3436", text_align=ft.TextAlign.CENTER),
                 ft.Image(
-                    src="https://images.icon-icons.com/3446/PNG/512/account_profile_user_avatar_icon_219236.png", 
-                    width=120,
-                    height=120,
-                    fit=ft.ImageFit.CONTAIN, #Image for login container
+                    # URL de imagen de usuario actualizada
+                    src="https://e7.pngegg.com/pngimages/146/551/png-clipart-user-login-mobile-phones-password-user-miscellaneous-blue.png",
+                    width=120, height=120, fit=ft.ImageFit.CONTAIN
                 ),
-
-                ft.Divider(height=25, color="transparent"), #divider for spacing
                 txt_user,
-                txt_password, #fields for user and password
-                ft.Container(height=20),
-                ft.ElevatedButton( #Enter button after entering credentials
+                txt_password,
+                txt_error,
+                ft.ElevatedButton(
                     content=ft.Text("Enter", size=20, weight=ft.FontWeight.BOLD),
                     on_click=login_click,
-                    bgcolor="blue700",
-                    color="white",
-                    height=50 #Button design
-                ),
-                txt_error, #Error message container
-                ft.Container(expand=True), 
+                    bgcolor="#74b9ff", color="#ffffff", height=50, expand=True
+                )
             ],
-            spacing=15,
+            alignment=ft.MainAxisAlignment.CENTER,
+            spacing=25,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            scroll=ft.ScrollMode.AUTO
         ),
-        width=400, 
-        height=600,
-        padding=35,
+        padding=25,
+        width=400,
+        height=500,
         border_radius=20,
-        bgcolor="white",
-        shadow=ft.BoxShadow(spread_radius=1, blur_radius=15, color="black26"),
-        alignment=ft.alignment.center, #ft Container design
+        bgcolor="#f0f0f0",
+        alignment=ft.alignment.center,
     )
 
-    login_view = ft.View( #View for login page
+    login_view = ft.View(
         "/",
         [
-            ft.Stack( #Stack for background and login form
+            ft.Stack(
                 controls=[
-                    background_design, #Background design container
+                    background_design,
                     ft.Container(content=login_form, alignment=ft.alignment.center, expand=True),
-                    ft.Container( #Container for logo at bottom right
+                    ft.Container(
                         content=ft.Image(
+                            # URL de logo actualizada
                             src="https://d31i9b8skgubvn.cloudfront.net/folder/logos/3678_logo_IJdTc4y2nxqKLZjf.png",
-                            fit=ft.ImageFit.CONTAIN, opacity=0.7
+                            fit=ft.ImageFit.CONTAIN, opacity=0.9
                         ),
-                        width=160, height=100, alignment=ft.alignment.bottom_right, right=10, bottom=10
+                        width=140, height=100,
+                        alignment=ft.alignment.bottom_right, right=10, bottom=10
                     )
                 ],
-                expand=True,
+                expand=True
             )
         ]
     )
-    
 
     # Dashboard
-       # Panel
-    def gadget_toggle(e): #Function to toggle gadget states
+    def gadget_toggle(e):
         btn = e.control
         display_name = btn.data
-        gadget_key = data_mapping.get(display_name) #Get internal key from display name
-        if not gadget_key: #Determine if gadget key is valid
+        gadget_key = data_mapping.get(display_name)
+        if not gadget_key:
             return
-
-        gadget_states[gadget_key] = not gadget_states[gadget_key] #alternate gadget state
+        gadget_states[gadget_key] = not gadget_states[gadget_key]
         started = gadget_states[gadget_key]
-        btn.bgcolor = "green700" if started else "red700"
-        btn.text = f"{display_name}: {'On' if started else 'Off'}" #Update button text and color
+        
+        # Change button style based on state
+        btn.bgcolor = "#0984e3" if started else "#74b9ff"
+        btn.text = f"{display_name}: {'On' if started else 'Off'}"
+        
         page.update()
-        control_gadget(gadget_key, "on" if started else "off") #Call service function to control gadget
+        control_gadget(gadget_key, "on" if started else "off")
 
-    def change_slide(e): #Define function to handle slider changes
+    def change_slide(e):
         value = int(e.control.value)
-        speed_value.value = f"Speed: {value}%" #Update speed value text
+        speed_value.value = f"Speed: {value}%"
         page.update()
         set_motor_pwm(value)
 
-    # Slider for motor speed control
-    speed_value = ft.Text("Speed: 0%", size=16, color="white")
+    # Slider
+    speed_value = ft.Text("Speed: 0%", size=16, color="#2d3436")
     velocidad_slider = ft.Slider(
-        min=0, max=100, divisions=100, value=0, #Define ranges and divisions
+        min=0, max=100, divisions=100, value=0,
         on_change=change_slide,
-        active_color="blue700", thumb_color="blue900", expand=True
-    )
-    slider_container = ft.Container( #Slider button container
-        content=ft.Column(
-            [velocidad_slider, speed_value],
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER
-        ),
-        padding=25,
-        border_radius=15,
-        bgcolor="rgba(255,255,255,0.15)",
-        expand=True
+        active_color="#74b9ff", thumb_color="#2d3436", expand=True
     )
 
-    # Buttons
-    buttons_row = ft.ResponsiveRow( #Create a responsive row to contain de gadgets buttons
-        spacing=25,
+    slider_container = ft.Container(
+        content=ft.Column([velocidad_slider, speed_value],
+                          horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+        padding=15, border_radius=15, bgcolor="rgba(255,255,255,0.3)", expand=True
+    )
+
+    # Botones
+    buttons_row = ft.ResponsiveRow(
+        spacing=30,  # separa más los botones
+        run_spacing=30, # Agrega espaciado vertical para mejor ajuste en pantallas pequeñas
         controls=[
-            ft.Container( #Each gadget is placed a container
+            ft.Container(
                 content=ft.ElevatedButton(
-                    text=f"{gadget}: Off", data=gadget, #The button and the state
-                    on_click=gadget_toggle, #Calling gadget_toggle
-                    bgcolor="red700", color="white",
-                    height=90, expand=True, #Buttons design
-                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=15)) #Rounded Border for the buttons
+                    text=f"{gadget}: Off", data=gadget, on_click=gadget_toggle,
+                    bgcolor="#74b9ff",
+                    color="#ffffff",
+                    height=90,  # Altura aumentada
+                    expand=True,
+                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=15))
                 ),
-                col={"xs":12, "sm":6, "md":3},
-                expand=True,
+                col={"xs":12, "sm":6, "md":3}, expand=True
             ) for gadget in ["Ilumination", "Sound", "Motor", "Routine"]
         ]
     )
-
-    # Dashboard panel content
-    panel_content = ft.Container( #Main container inside the dashboard
-        content=ft.Column(
-            controls=[
-                ft.Text("Octynomo controls", size=34, weight="bold", color="white"), #Title and design
-                ft.Text("Features", size=22, color="white70"), #Subtitle and design
-                buttons_row, #Inserting  buttons responsive row
-                ft.Divider(height=40, color="transparent"), 
-                slider_container #Insert slider_container
-            ],
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=25
-        ),
-        padding=ft.padding.only(left=40, right=40, top=30, bottom=80), #Padding for the container
-        border_radius=20,
-        bgcolor="rgba(255,255,255,0.1)",
-        shadow=ft.BoxShadow(spread_radius=1, blur_radius=20, color="black26"),
-        expand=True
+    
+    # Nuevo contenedor para agrupar títulos
+    header_content = ft.Column(
+        controls=[
+            ft.Text("Octynomo controls", size=32, weight=ft.FontWeight.BOLD, color="#2d3436", text_align=ft.TextAlign.CENTER),
+            ft.Text("Features", size=22, color="#0984e3", text_align=ft.TextAlign.CENTER),
+        ],
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        spacing=5 # Espacio mínimo entre títulos
     )
 
-    panel_view = ft.View( #View for dashboard panel 
+    # Panel content: Usa START y un contenedor expandible para empujar el slider hacia abajo
+    panel_content = ft.Column(
+        controls=[
+            header_content, # 1. Títulos
+            # Espacio fijo pequeño para la separación inicial de los botones con el título
+            ft.Divider(height=40, color="transparent"), 
+            
+            buttons_row,    # 2. Botones
+            
+            # 3. Separador fijo para dar una distancia mínima del slider
+            ft.Divider(height=80, color="transparent"),
+            
+            # 4. Contenedor que absorbe todo el espacio vertical extra y empuja el siguiente elemento (el slider) hacia abajo.
+            ft.Container(expand=True),
+            
+            # 5. Slider - Se queda en la parte inferior del espacio disponible
+            ft.Container(
+                content=slider_container,
+                width=800, # Establecemos un ancho máximo para que no se extienda demasiado horizontalmente
+            )
+        ],
+        spacing=20, # Espacio entre los elementos
+        alignment=ft.MainAxisAlignment.START, # Asegura que todo comience desde arriba
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        expand=True,
+        scroll=ft.ScrollMode.AUTO
+    )
+
+    panel_view = ft.View(
         "/panel",
         [
-            ft.Stack( #Stack for background and panel content
+            ft.Stack(
                 controls=[
                     background_design,
-                    ft.Container(content=panel_content, expand=True, alignment=ft.alignment.center),
+                    ft.Container(
+                        content=panel_content, 
+                        expand=True, 
+                        # Modificado a 60 para subir los títulos
+                        alignment=ft.alignment.top_center, 
+                        padding=ft.padding.only(top=60, bottom=50, left=20, right=20)
+                    ),
                     ft.Container(
                         content=ft.Image(
-                            src="https://d31i9b8skgubvn.cloudfront.net/folder/logos/3678_logo_IJdTc4y2nxqKLZjf.png", #Insert logo at bottom right
-                            fit=ft.ImageFit.CONTAIN, opacity=0.7
+                            # Logo actualizado
+                            src="https://d31i9b8skgubvn.cloudfront.net/folder/logos/3678_logo_IJdTc4y2nxqKLZjf.png",
+                            fit=ft.ImageFit.CONTAIN, opacity=0.9
                         ),
-                        width=130, height=100,
-                        alignment=ft.alignment.bottom_right, right=10, bottom=10 #Positioning
+                        width=140, height=100,
+                        alignment=ft.alignment.bottom_right, right=10, bottom=10
                     )
                 ],
                 expand=True
@@ -215,10 +217,10 @@ def main(page: ft.Page):
 
     def route_change(route):
         page.views.clear()
-        page.views.append(login_view) #Define views based on route
+        page.views.append(login_view)
         if page.route == "/panel":
             page.views.append(panel_view)
-        page.update() #Update page on route change
+        page.update()
 
     page.on_route_change = route_change
     page.go(page.route)
