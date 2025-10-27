@@ -1,17 +1,44 @@
-import requests
+import httpx
 
-RASP_IP = "http://127.0.0.1:8000"
+RASP_IP = "http://10.42.0.1:8000"
 
-def control_gadget(gadget, state):
+async def control_gadget(gadget: str, action: str):
+    """
+    Envía comandos ON/OFF a la API de control de hardware de forma asíncrona.
+    
+    Usar httpx es CRÍTICO para no bloquear la interfaz de Flet.
+    """
     try:
-        r = requests.post(f"{RASP_IP}/control", json={"gadget": gadget, "action": state}, timeout=3)
-        print(f"✅ Enviado: {gadget} -> {state} | Respuesta: {r.text}")
+        # Usamos httpx.AsyncClient para manejar la petición de forma asíncrona
+        async with httpx.AsyncClient(base_url=RASP_IP) as client:
+            # El 'await' aquí es necesario porque la petición de red es una operación asíncrona
+            response = await client.post(
+                "/control",
+                json={"gadget": gadget, "action": action},
+                timeout=5.0
+            )
+        if response.status_code == 200:
+            print(f"Control {gadget} OK: {action}")
+        else:
+            print(f"Error al controlar {gadget} (Código {response.status_code}): {response.text}")
     except Exception as e:
-        print(f"⚠️ Error al conectar: {e}")
+        print(f"Error de conexión al API /control: {e}")
 
-def set_motor_pwm(value):
+async def set_motor_pwm(value: int):
+    """
+    Envía el valor PWM del motor a la API de forma asíncrona.
+    """
     try:
-        r = requests.post(f"{RASP_IP}/pwm", json={"value": int(value)}, timeout=3)
-        print(f"✅ PWM {value}% | Respuesta: {r.text}")
+        async with httpx.AsyncClient(base_url=RASP_IP) as client:
+            # El 'await' aquí es necesario porque la petición de red es una operación asíncrona
+            response = await client.post(
+                "/pwm",
+                json={"value": value},
+                timeout=5.0
+            )
+        if response.status_code == 200:
+            print(f"PWM OK: {value}%")
+        else:
+            print(f"Error al establecer PWM (Código {response.status_code}): {response.text}")
     except Exception as e:
-        print(f"⚠️ Error al enviar PWM: {e}")
+        print(f"Error de conexión al API /pwm: {e}")
