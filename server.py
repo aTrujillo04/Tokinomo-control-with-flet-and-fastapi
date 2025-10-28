@@ -39,7 +39,6 @@ def wait_pir():
             print("PIR detectó movimiento, ejecutando rutina.")
             hardware.luz.on()
             hardware.motor_1a.value = 0.7
-            hardware.motor_2a.value = 0.7
             subprocess.Popen(
                 ["mpg123", "-q", "--loop", "-1", hardwareSONIDO_PATH],
                 stdout=subprocess.DEVNULL,
@@ -66,7 +65,6 @@ async def control(request: Request):
     if gadget == "motor":
         value = 0.01 if action == "on" else 0
         hardware.motor_1a.value = value
-        hardware.motor_2a.value = value
         return {"status": "ok", "gadget": gadget, "action": action}
 
     if gadget == "sound":
@@ -90,7 +88,6 @@ async def control(request: Request):
             active_routine = False
             hardware.luz.off()
             hardware.motor_1a.value = 0
-            hardware.motor_2a.value = 0
             subprocess.run(["pkill", "mpg123"])
             return {"status": "ok", "gadget": gadget, "action": "off"}
 
@@ -106,7 +103,6 @@ async def pwm_control(request: Request):
         if 0 <= v <= 100:
             duty = v / 100
             hardware.motor_1a.value = duty
-            hardware.motor_2a.value = duty
             return {"status": "ok", "pwm": v}
         return JSONResponse({"status": "error", "message": "Out of range"}, status_code=400)
     except (TypeError, ValueError):
