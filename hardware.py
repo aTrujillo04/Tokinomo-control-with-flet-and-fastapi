@@ -1,13 +1,13 @@
 import atexit
 from gpiozero import LED, PWMLED, MotionSensor
 
-# --- Pines de hardware ---
+
 PIN_LUZ = 22
 PIN_MOTOR_1A = 12
 PIN_PIR = 25
 PIN_ENABLE = 4
 
-# --- Variables de hardware (inicialmente None) ---
+
 luz = None
 motor_1a = None
 pir = None
@@ -32,5 +32,5 @@ def cleanup_gpio():
     if luz: luz.off()
     if motor_1a: motor_1a.off()
 
-# Registrar cleanup al salir
+
 atexit.register(cleanup_gpio)

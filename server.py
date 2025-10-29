@@ -10,16 +10,16 @@ import uvicorn
 import hardware
 from hardware import init_hardware
 
-# --- VARIABLES GLOBALES ---
+
 active_routine = False
 ASSETS_DIR = os.path.abspath("assets")
 
-# --- SERVIDOR FASTAPI ---
+-
 app = FastAPI(title="Raspberry Controls")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # luego puedes restringirlo si quieres
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,7 +47,7 @@ def wait_pir():
             break
         time.sleep(0.1)
 
-# --- ENDPOINT /control ---
+# endpoint control
 @app.post("/control")
 async def control(request: Request):
     global active_routine
@@ -93,7 +93,7 @@ async def control(request: Request):
 
     return JSONResponse({"status": "error", "message": "Invalid gadget"}, status_code=400)
 
-# --- ENDPOINT /pwm ---
+#endpoint pwm
 @app.post("/pwm")
 async def pwm_control(request: Request):
     data = await request.json()
@@ -108,11 +108,9 @@ async def pwm_control(request: Request):
     except (TypeError, ValueError):
         return JSONResponse({"status": "error", "message": "Invalid value"}, status_code=400)
 
-# --- MONTAR DASHBOARD ---
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
-app.mount("/frontend", StaticFiles(directory="frontend", html=True))
+app.mount("/frontend", StaticFiles(directory="frontend", html=True)
 
-# --- MAIN ---
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("server:app", host="0.0.0.0", port=8000)
