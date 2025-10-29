@@ -1,24 +1,24 @@
 import atexit
 from gpiozero import LED, PWMLED, MotionSensor
 
-
+#Established pinout
 PIN_LUZ = 22
 PIN_MOTOR_1A = 12
 PIN_PIR = 25
 PIN_ENABLE = 4
 
-
+#Initialized variables to avoid GPIO bussy error
 luz = None
 motor_1a = None
 pir = None
 enable = None
 
-# --- Audio ---
+#Audio path
 SONIDO_PATH = "/home/octinomo/Tokinomo-control-with-flet-and-fastapi/assets/ZWAN.mp3"
 
+#Function to initialize the variables by the defined pinout.
 def init_hardware():
-    """Inicializa los pines de hardware. Llamar solo una vez al iniciar FastAPI"""
-    global luz, motor_1a, motor_2a, pir, enable
+    global luz, motor_1a, pir, enable
 
     luz = LED(PIN_LUZ)
     motor_1a = PWMLED(PIN_MOTOR_1A, frequency=1000)
@@ -26,11 +26,12 @@ def init_hardware():
     enable = LED(PIN_ENABLE)
     enable.on()
 
-def cleanup_gpio():
+#Funcion to close and clear all the pinout when the server is closed.
+def close_pinout():
     print("Turning off all pinout")
-    if enable: enable.off()
-    if luz: luz.off()
-    if motor_1a: motor_1a.off()
+    if enable: enable.close()
+    if luz: luz.close()
+    if motor_1a: motor_1a.close()
 
 
-atexit.register(cleanup_gpio)
+atexit.register(close_pinout)
