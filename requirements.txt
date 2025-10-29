@@ -1,0 +1,22 @@
+#Requirements for the project
+
+#FastAPI for building the web application
+fastapi==0.120.0
+
+#Uvicorn as the ASGI server
+uvicorn==0.38.0
+
+#gpiozero for GPIO pin control
+gpiozero==2.0.1
+
+#mpg123 for audio playback
+mpg123==0.4
+
+#RPi.GPIO for Raspberry Pi GPIO pin control/alternative
+rpi.gpio==0.7.1
+
+#lgpio for low-level GPIO access/alternative
+lgpio==0.2.20
+
+#requests for making HTTP requests
+requests==2.32.5
