@@ -2,7 +2,7 @@
 
 This project is a **Dashboard built with HTML** to control a Tokinomo and its features via a **Raspberry Pi 5**.
 
-![](dashboard.gif)
+![](/assets/dashboard.gif)
 
 ## Features
 
