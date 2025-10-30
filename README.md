@@ -87,7 +87,7 @@ Then, you wil be able to visualize the graphic interface by entering the followi
 python3 app.py
 ```
 
-And then, entering in **any offline/online devide** the following url for the site, for example:
+And then, entering in **any offline/online devide** the url for the site, for example:
 
 ```bash
 http://**<IP_ADDRESS>**:9000/frontend/
@@ -99,15 +99,31 @@ First, you will see a login section, which you can bypass by entering the follow
 If the server **runs optimally** and is waiting for HTTP requests you should see something like this:
 
 ```bash
-* Serving Flask app 'Tokinomo'
- * Debug mode: off
-WARNING: This is a development server. Do not use it in a production deployment.
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:5000
- * Running on http://<tu_IP_local>:5000
-Press CTRL+C to quit
+ @app.on_event("startup")
+INFO:     Started server process [2242]
+INFO:     Waiting for application startup.
+Hardware initialized
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
 ```
-Finally, let's create a pm2 process and make it a **startup** one so the Flask server will automatically run 15 seconds after the Raspberry is energyzed.
+
+Some **IMPORTANT** considerations you must have are than you must be connected to **the same wireless network** from the devide you enter the URL than your Raspberry pi 5. Then, you must enter the correct IP address in the url to complete de connection, you can know it doing in your terminal:
+
+```bash
+hostname -I
+```
+
+In order to make the communication efficient and easier for the user, a wireless network was created. So, the Raspberry pi 5 could be an available hotspot with **static ip**. In this way, 
+a **efficient offline** server was developed. Follow the next steps to do it:
+
+Click on the **WI-fi** icon in the upper right corner of your graphic interface. Then click the **advanced options** button and select the **Create wireless hotspot** option. Finally, enter a valid
+wireless network name and password.
+
+IMAGENNN AGREGARRRRR
+
+Now, you have created a wireless network that you Raspberry pi 5 can serve as a **hotspot**. So all the devices in which you must open de dashboard **must be connected to your recently created wireless connection** and due to the hotspot function, the Raspberry pi 5 **will always have the same static IP**.
+
+Finally, let's create a pm2 process and make it a **startup** one so the FastAPI server will automatically run 15 seconds after the Raspberry is energyzed. In this way, it not neccesary to access graphically to the Raspberry pi 5 and launch the server.
 
 First let's create a .sh file **in home**. The file will contain this:
 
@@ -179,3 +195,4 @@ Again, you must see something like this, and finish the process:
 │ 0   │ tokinomo      │ fork │ 1234│ online  │
 └─────┴───────────────┴──────┴─────┴─────────┘
 ```
+
