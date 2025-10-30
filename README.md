@@ -1,4 +1,4 @@
-# Tokinomo Control Dashboard with HTML and Flask
+# Tokinomo Control Dashboard with HTML and FastAPI
 
 This project is a **Dashboard built with HTML** to control a Tokinomo and its features via a **Raspberry Pi 5**.
 
@@ -13,10 +13,10 @@ This project is a **Dashboard built with HTML** to control a Tokinomo and its fe
 
 ## Communication
 
-The Dashboard communicates remotely with the Raspberry Pi using a **Flask server**:
+The Dashboard communicates remotely with the Raspberry Pi using a **FastAPI server**:
 
 1. The Dashboard sends **HTTP POST requests** with JSON data that contains button states (on/off or PWM values).  
-2. The Flask server decodes the data and executes the programmed logic to:
+2. The FastAPI server decodes the data and executes the programmed logic to:
    - Turn GPIOs on or off.  
    - Adjust PWM signals according to user input.
 
@@ -42,14 +42,140 @@ This setup enables full remote control of the Tokinomo through the Dashboard.
 - Actuator to simulate Tokinomo arm.
 
 **Software**
-- Ubuntu **v22.04**
-- Flet **v0.28.3**
-- Flask **v3.1.2**
-- Python **v3**
+- Ubuntu **v22.04** 
+- FastAPI **v0.120.0**
+- Python 3.10
 
 ## Installation
 
+The **server.py** script runs a FastAPI server that manages communication between the web interface and the Raspberry Pi hardware. It initializes GPIO components, defines endpoints (/control and /pwm) to operate illumination, motor speed, sound playback, and an automated PIR-based routine. The server also serves static files such as the dashboard and assets, and allows remote interaction through CORS. 
+
+**Index.html** file defines the interactive web dashboard that controls the Raspberry Pi system. It includes a login interface and a dynamic control panel with buttons for illumination, motor, sound, and an automated routine, plus a slider to adjust PWM motor speed. Through JavaScript fetch requests and POST method, it communicates with the FastAPI backend. T
+
+Finally **hardware.py** handles all GPIO-related configurations and interactions with the Raspberry Pi hardware. It defines pin assignments for LEDs, a motor (PWM), and a PIR motion sensor, and initializes them using the gpiozero library. It also provides cleanup functions to safely release GPIO resources when the server shuts down. Additionally, it stores the path to the audio file used in the system’s sound routine.
+
+So now, let's first clone the repository by writing in your terminal:
 
 ```bash
-git clone https://github.com/aTrujillo04/Remote-Dashboard-for-Tokinomo-in-Flet
+git clone https://github.com/aTrujillo04/Tokinomo-control-with-html-and-fastapi.git
+```
+
+The server was created in order to **control** the Tokinomo from **any remote device** and keep the server launched in a **local and offline way**.
+So first, let's create a virtual enviroment. This virtual enviroment should be created **inside this repository**, it will contain the tools and libraries required to work. 
+
+```bash
+cd /route/to/this/repository
+python3 -m venv name
+source name/bin/activate
+```
+The previous lines place you in the repository location inside your computer, create your virtual enviroment and activate it. When the virtual enviroment is activated you should see something like this:
+
+```bash
+(name) user@computer:~/route/to/repository$
+```
+
+Now let's download the requirements **inside the new virtual enviroment** and verify the installation by seeing the downloaded version:
+
+```bash
+pip install -r requirements.txt
+pip show fastapi requests gpiozero lgpio rpi.gpio uvicorn
+```
+You should be able to see something like this: **FastAPI vX.X.X**
+Then, you wil be able to visualize the graphic interface by entering the following command in the terminal:
+
+```bash
+python3 app.py
+```
+
+And then, entering in **any offline/online devide** the following url for the site, for example:
+
+```bash
+http://**<IP_ADDRESS>**:9000/frontend/
+```
+
+First, you will see a login section, which you can bypass by entering the following credentials: **user: a** and **password: 1**. After logging in, the Tokinomo dashboard will be displayed.
+
+
+If the server **runs optimally** and is waiting for HTTP requests you should see something like this:
+
+```bash
+* Serving Flask app 'Tokinomo'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://<tu_IP_local>:5000
+Press CTRL+C to quit
+```
+Finally, let's create a pm2 process and make it a **startup** one so the Flask server will automatically run 15 seconds after the Raspberry is energyzed.
+
+First let's create a .sh file **in home**. The file will contain this:
+
+```bash
+#!/bin/bash
+sleep 15
+pm2 start /home/ubuntu_user/folder/Tokinomo.py --name desired_name --interpreter python3
+```
+Now, let's create the process. First let's install and verify the nodejs and npm installation:
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+
+sudo apt install -y nodejs
+npm -v
+
+sudo npm install -g pm2
+pm2 -v
+```
+After you see the versions, you can confirm the installation. So now, let's create the pm2 process, first making executable the script.sh you just created:
+
+```bash
+chmod +x /home/ubuntu_user/folder/tokinomo_server.sh
+```
+Now, let's test the pm2 process manually and verify its creation:
+
+```bash
+pm2 start /home/pi/Tokinomo/tokinomo_server.sh --desired_name_for_pm2
+pm2 status
+```
+You should see something like this:
+
+```bash
+┌─────┬───────────────┬──────┬─────┬─────────┐
+│ id  │ name          │ mode │ pid │ status  │
+├─────┼───────────────┼──────┼─────┼─────────┤
+│ 0   │ tokinomo      │ fork │ 1234│ online  │
+└─────┴───────────────┴──────┴─────┴─────────┘
+```
+
+FInally, let's make it a **startup** process and save it:
+
+```bash
+pm2 startup
+```
+You will recieve an output such as this one:
+
+```bash
+sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u pi --hp /home/user
+```
+You must copy and enter it to the terminal, and finally make:
+
+```bash
+pm2 save
+```
+To finish, you must restart the raspberry and verify the pm2 creation:
+
+```bash
+sudo reboot
+pm2 status
+```
+Again, you must see something like this, and finish the process:
+
+```bash
+┌─────┬───────────────┬──────┬─────┬─────────┐
+│ id  │ name          │ mode │ pid │ status  │
+├─────┼───────────────┼──────┼─────┼─────────┤
+│ 0   │ tokinomo      │ fork │ 1234│ online  │
+└─────┴───────────────┴──────┴─────┴─────────┘
 ```
