@@ -81,20 +81,11 @@ pip install -r requirements.txt
 pip show fastapi requests gpiozero lgpio rpi.gpio uvicorn
 ```
 You should be able to see something like this: **FastAPI vX.X.X**
-Then, you wil be able to visualize the graphic interface by entering the following command in the terminal:
+Then, you wil be able to **launch the server** by entering the following command in the terminal:
 
 ```bash
 python3 app.py
 ```
-
-And then, entering in **any offline/online devide** the url for the site, for example:
-
-```bash
-http://**<IP_ADDRESS>**:9000/frontend/
-```
-
-First, you will see a login section, which you can bypass by entering the following credentials: **user: a** and **password: 1**. After logging in, the Tokinomo dashboard will be displayed.
-
 
 If the server **runs optimally** and is waiting for HTTP requests you should see something like this:
 
@@ -106,22 +97,6 @@ Hardware initialized
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
 ```
-
-Some **IMPORTANT** considerations you must have are than you must be connected to **the same wireless network** from the devide you enter the URL than your Raspberry pi 5. Then, you must enter the correct IP address in the url to complete de connection, you can know it doing in your terminal:
-
-```bash
-hostname -I
-```
-
-In order to make the communication efficient and easier for the user, a wireless network was created. So, the Raspberry pi 5 could be an available hotspot with **static ip**. In this way, 
-a **efficient offline** server was developed. Follow the next steps to do it:
-
-Click on the **WI-fi** icon in the upper right corner of your graphic interface. Then click the **advanced options** button and select the **Create wireless hotspot** option. Finally, enter a valid
-wireless network name and password.
-
-IMAGENNN AGREGARRRRR
-
-Now, you have created a wireless network that you Raspberry pi 5 can serve as a **hotspot**. So all the devices in which you must open de dashboard **must be connected to your recently created wireless connection** and due to the hotspot function, the Raspberry pi 5 **will always have the same static IP**.
 
 Finally, let's create a pm2 process and make it a **startup** one so the FastAPI server will automatically run 15 seconds after the Raspberry is energyzed. In this way, it not neccesary to access graphically to the Raspberry pi 5 and launch the server.
 
@@ -196,3 +171,149 @@ Again, you must see something like this, and finish the process:
 └─────┴───────────────┴──────┴─────┴─────────┘
 ```
 
+## Operation
+
+You will be able to open the dashboard entering in **any offline/online devide** the url for the site, for example:
+
+```bash
+http://**<IP_ADDRESS>**:9000/frontend/
+```
+
+First, you will see a login section, which you can bypass by entering the following credentials: **user: a** and **password: 1**. After logging in, the Tokinomo dashboard will be displayed.
+Some **IMPORTANT** considerations you must have are than you must be connected to **the same wireless network** from the devide you enter the URL than your Raspberry pi 5. Then, you must enter the correct IP address in the url to complete de connection, you can know it doing in your terminal:
+
+```bash
+hostname -I
+```
+
+In order to make the communication efficient and easier for the user, a wireless network was created. So, the Raspberry pi 5 could be an available hotspot with **static ip**. In this way, 
+a **efficient offline** server was developed. Follow the next steps to do it:
+
+Click on the **WI-fi** icon in the upper right corner of your graphic interface. Then click the **advanced options** button and select the **Create wireless hotspot** option. Finally, enter a valid
+wireless network name and password.
+
+![](/assets/wlan.jpeg)
+
+Now, you have created a wireless network that you Raspberry pi 5 can serve as a **hotspot**. So all the devices in which you must open de dashboard **must be connected to your recently created wireless connection** and due to the hotspot function, the Raspberry pi 5 **will always have the same static IP**.
+
+## Specs 
+For desired changes inside the dashboard:
+- The page title can be modified in the following line (line 6):
+  
+```bash
+ <title> Octinomo Controls </title>
+```
+
+- The password and user can be defined in the following lines, and also the message showed for incorrect users (line 246-255):
+
+```bash
+f(user==="a" && pass==="1"){
+    document.getElementById("login").style.display="none";
+    const dash = document.getElementById("dashboard");
+    dash.style.display="flex";
+    dash.classList.add("show");
+    document.getElementById("speedSlider").value = 0;
+    updateValue(0);
+    error.innerText="";
+  } else {
+    error.innerText = "User or password incorrect.";
+```
+- The images can be changed in line 203 and 233:
+
+  ```bash
+   <img src="/assets/login.png" alt="Login" class="login-image">
+  ``
+- To change dashboard titles and its properties check from line 210 to 214:
+
+  ```bash
+ <div class="dashboard" id="dashboard">
+  <div class="dashboard-header">
+    <h1>Octinomo Control</h1>
+    <h2>Features</h2>
+  </div>
+  ```
+
+  ## Project Structure
+  
+```text
+Remote-Dashboard-for-Tokinomo-in-Flet/
+├── assets/
+│   ├── ZWAN.MP3
+│   ├── dashboard.gif
+│   └── dashboard.webm
+|   |__ login.png
+|   |__ logo.png
+|   |__wlan.jpeg
+├── frontend/
+│   ├── index.html
+├── gitignore
+├── README.md
+├── hardware.py
+├── requirements.py
+├── server.py
+```
+
+## Troubleshooting
+While trying to use **the dashboard buttons**,you may get this message error:
+
+```bash
+⚠️ Error while connecting to Raspberry (ilumination): HTTPConnectionPool(host='192.168.1.169', port=5000): Max retries exceeded with url: /control (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x72c2b3f513c0>, 'Connection to 192.168.1.169 timed out. (connect timeout=3)
+```
+This means that the HTTP request is sent, but no recived because of communication troubles with Flask server. So you must:
+1. Confirm that your remote PC/Laptop is connected  to the same WI-fi network than your Raspberry.
+2. Confirm that the dashboard has the same IP addres than your Raspberry.
+3. Verify the Flask server operation.
+4. Verify that port 5000 is not blocked.
+
+Another common error you could have while running the **Flask server**:
+
+```bash
+Traceback (most recent call last):
+  File "Tokinomo.py", line 54, in <module>
+    GPIO.setup(4, GPIO.OUT)
+  File "/usr/lib/python3/dist-packages/RPi/GPIO/__init__.py", line 164, in setup
+    raise error("gpio not allocated")
+RuntimeError: gpio not allocated
+```
+This means that the script cannot access to the GPIO Raspberry pinout, so each of these solutions could help:
+1. Look for other proccess or scripts using the pinout and stop them:
+
+```bash
+ps aux | grep pigpiod
+sudo systemctl stop pigpiod
+```
+It is optional to restart GPIO service:
+
+```bash
+sudo systemctl restart gpiochip
+```
+2. Execute your script with superuser permissions:
+
+```bash
+sudo python3 Tokinomo.py
+```
+3. It is suggested to clean the pin state at the end of all your scripts, so the pins can stay unocuppied while not running any script. So add at the end of all your scripts that use GPIO pinout:
+```bash
+GPIO.cleanup()
+```
+
+4. Another unlikely solution could be reinstall RPi.GPIO:
+```bash
+sudo apt purge python3-rpi.gpio -y
+sudo apt autoremove -y
+sudo apt install python3-rpi.gpio -y
+```
+**IMPORTANT: AFTER APPLYING ANY OF THESE SOLUTION YOU MUST RESTART THE RASPBERRY AND TEST THE COMMUNICATION AGAIN:**
+
+```bash
+sudo reboot
+```
+
+## Contributing
+Contributions are appreciated. Please follow this steps to contribute:
+1. Clon the repository.
+2. Create a new branch.
+3. Make your changes in the new branch.
+4. Commit your changes.
+5. Make a push inside your own branch.
+6. Make a Pull Request.
