@@ -207,7 +207,7 @@ For desired changes inside the dashboard:
 - The password and user can be defined in the following lines, and also the message showed for incorrect users (line 246-255):
 
 ```bash
-f(user==="a" && pass==="1"){
+(user==="a" && pass==="1"){
     document.getElementById("login").style.display="none";
     const dash = document.getElementById("dashboard");
     dash.style.display="flex";
@@ -220,18 +220,18 @@ f(user==="a" && pass==="1"){
 ```
 - The images can be changed in line 203 and 233:
 
-  ```bash
-   <img src="/assets/login.png" alt="Login" class="login-image">
-  ``
+```bash
+<img src="/assets/login.png" alt="Login" class="login-image">
+```
 - To change dashboard titles and its properties check from line 210 to 214:
 
-  ```bash
- <div class="dashboard" id="dashboard">
+```bash
+<div class="dashboard" id="dashboard">
   <div class="dashboard-header">
     <h1>Octinomo Control</h1>
     <h2>Features</h2>
-  </div>
-  ```
+</div>
+```
 
   ## Project Structure
   
@@ -254,28 +254,32 @@ Remote-Dashboard-for-Tokinomo-in-Flet/
 ```
 
 ## Troubleshooting
-While trying to use **the dashboard buttons**,you may get this message error:
+While trying to connect to **the dashboard**,you may get some connections error in the internet browser such as **unable to connect** / **check internet connnection**
+This means that you are entering **incorrect data** in the URL. So you must:
+
+1. Confirm that your remote PC/Laptop is connected  to **the same WI-fi network** than your Raspberry.
+2. Confirm that you are entering the correct port **(:9000)**.
+3. Confirm that you are entering **/frontend** at the end of the URL.
+4. Confirm that the URL has the **same IP addres** than your Raspberry.
+5. Verify the FastAPI server operation by the **given log**.
+6. Verify that **port 9000** is not blocked.
+
+Another common error you could have while running the **FastAPI server**:
 
 ```bash
-⚠️ Error while connecting to Raspberry (ilumination): HTTPConnectionPool(host='192.168.1.169', port=5000): Max retries exceeded with url: /control (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x72c2b3f513c0>, 'Connection to 192.168.1.169 timed out. (connect timeout=3)
+Traceback (most recent call last):  
+  File "test.py", line 6, in <module>  
+    GPIO.setup(P_SERVO, GPIO.OUT)  
+  File “/…/RPi/GPIO/__init__.py”, line 704, in setup  
+    initial = _check(lgpio.gpio_read(_chip, gpio))  
+  File “/…/lgpio.py”, line 903, in gpio_read  
+    return _u2i(_lgpio._gpio_read(handle&0xffff, gpio))  
+  File “/…/lgpio.py”, line 458, in _u2i  
+    raise error(error_text(v))  
+lgpio.error: 'GPIO not allocated'  
+``` :contentReference[oaicite:2]{index=2}  
 ```
-This means that the HTTP request is sent, but no recived because of communication troubles with Flask server. So you must:
-1. Confirm that your remote PC/Laptop is connected  to the same WI-fi network than your Raspberry.
-2. Confirm that the dashboard has the same IP addres than your Raspberry.
-3. Verify the Flask server operation.
-4. Verify that port 5000 is not blocked.
-
-Another common error you could have while running the **Flask server**:
-
-```bash
-Traceback (most recent call last):
-  File "Tokinomo.py", line 54, in <module>
-    GPIO.setup(4, GPIO.OUT)
-  File "/usr/lib/python3/dist-packages/RPi/GPIO/__init__.py", line 164, in setup
-    raise error("gpio not allocated")
-RuntimeError: gpio not allocated
-```
-This means that the script cannot access to the GPIO Raspberry pinout, so each of these solutions could help:
+This means that the script **cannot access to the GPIO Raspberry pinout**, so each of these solutions could help:
 1. Look for other proccess or scripts using the pinout and stop them:
 
 ```bash
@@ -293,6 +297,7 @@ sudo systemctl restart gpiochip
 sudo python3 Tokinomo.py
 ```
 3. It is suggested to clean the pin state at the end of all your scripts, so the pins can stay unocuppied while not running any script. So add at the end of all your scripts that use GPIO pinout:
+4. 
 ```bash
 GPIO.cleanup()
 ```
@@ -308,6 +313,31 @@ sudo apt install python3-rpi.gpio -y
 ```bash
 sudo reboot
 ```
+
+Another common error, could be:
+
+```
+home/octinomo/Tokinomo-control-with-flet-and-fastapi/server.py:33: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+Traceback (most recent call last):
+  File "/home/octinomo/Tokinomo-control-with-flet-and-fastapi/server.py", line 130, in <module>
+    app.mount("frontend", StaticFiles(directory="frontend", html=True), name="frontend")
+   ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+```
+This means that your dashboard **cannot be mounted** in the server so you shoud:
+1. Verify your **.html** script name.
+2. Verify your **/frontend** folder name.
+3. It is suggested to use **index.html** name, due to **app.mount** look directly for that name.
+4. Verify the line 130, everything should concur.
+
+   ```bash
+   app.mount("/frontend", StaticFIles(directory="frontend", html= True), name="frontend")
+   ```
 
 ## Contributing
 Contributions are appreciated. Please follow this steps to contribute:
