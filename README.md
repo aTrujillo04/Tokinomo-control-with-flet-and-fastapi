@@ -50,7 +50,7 @@ This setup enables full remote control of the Tokinomo through the Dashboard.
 
 The **server.py** script runs a FastAPI server that manages communication between the web interface and the Raspberry Pi hardware. It initializes GPIO components, defines endpoints (/control and /pwm) to operate illumination, motor speed, sound playback, and an automated PIR-based routine. The server also serves static files such as the dashboard and assets, and allows remote interaction through CORS. 
 
-**Index.html** file defines the interactive web dashboard that controls the Raspberry Pi system. It includes a login interface and a dynamic control panel with buttons for illumination, motor, sound, and an automated routine, plus a slider to adjust PWM motor speed. Through JavaScript fetch requests and POST method, it communicates with the FastAPI backend. T
+**Index.html** file defines the interactive web dashboard that controls the Raspberry Pi system. It includes a login interface and a dynamic control panel with buttons for illumination, motor, sound, and an automated routine, plus a slider to adjust PWM motor speed. Through JavaScript fetch requests and POST method, it communicates with the FastAPI backend. 
 
 Finally **hardware.py** handles all GPIO-related configurations and interactions with the Raspberry Pi hardware. It defines pin assignments for LEDs, a motor (PWM), and a PIR motion sensor, and initializes them using the gpiozero library. It also provides cleanup functions to safely release GPIO resources when the server shuts down. Additionally, it stores the path to the audio file used in the system’s sound routine.
 
@@ -297,7 +297,7 @@ sudo systemctl restart gpiochip
 sudo python3 Tokinomo.py
 ```
 3. It is suggested to clean the pin state at the end of all your scripts, so the pins can stay unocuppied while not running any script. So add at the end of all your scripts that use GPIO pinout:
-4. 
+   
 ```bash
 GPIO.cleanup()
 ```
